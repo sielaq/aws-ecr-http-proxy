@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='90' font-size='90'>🐳</text></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐳 registry</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            background: linear-gradient(to bottom, #87CEEB 60%, #1E90FF);
+            background-size: cover;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        header {
+            /*background-color: #0073bb;*/
+            background: #4682B4;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.5em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+            text-shadow:
+              -1px -1px 0 black,
+              1px -1px 0 black,
+              -1px 1px 0 black,
+              1px 1px 0 black;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        ul li {
+            background: #f4f4f4;
+            margin: 5px 0; /* Reduced margin for tighter spacing */
+            padding: 10px 15px;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+        ul li:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        .subgroup {
+            display: none;
+            margin-left: 20px;
+            padding-left: 0; /* Removed extra padding between groups and tags */
+        }
+        .subgroup li {
+            background: #e9e9e9;
+            margin: 3px 0; /* Tighter spacing between repositories */
+            padding: 8px 12px; /* Reduced padding for a more compact look */
+        }
+        .subgroup li ul li {
+            background: #dfe6ef;
+            margin: 2px 0; /* Tighter spacing between tags */
+            padding: 6px 10px; /* Reduced padding for tags */
+        }
+        .expanded > .subgroup {
+            display: block;
+        }
+        .checkmark {
+            color: green;
+            font-size: 0.9em;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .checkmark.show {
+            opacity: 1;
+        }
+        .whale{
+          text-align: center;
+          animation: float 3s ease-in-out infinite;
+          font-size: 3rem;
+        }
+        .wave {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          white-space: nowrap;
+          overflow: hidden;
+          color: white;
+          text-shadow:
+            -1px -1px 0 black,
+            1px -1px 0 black,
+            -1px 1px 0 black,
+            1px 1px 0 black;
+          font-size: 1.5rem;
+          animation: wave 9s linear infinite;
+        }
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(8px);
+          }
+          50% {
+            transform: translateY(5px);
+          }
+        }
+        @keyframes wave {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header><div class="whale">🐳</div><div class="wave">🌊</div>  HTML_TITLE</header>
+        <div id="content">
+            <p class="loading">Loading repositories...</p>
+        </div>
+    </div>
+    <script>
+        // Load the JSON file and display grouped repository names with tags
+        fetch('repos.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load repos.json');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const contentDiv = document.getElementById('content');
+
+                // Sort repositories alphabetically by Repository name
+                data.sort((a, b) => a.Repository.localeCompare(b.Repository));
+
+                // Group repositories by top-level prefix
+                const grouped = {};
+                data.forEach(repoData => {
+                    const [group, ...rest] = repoData.Repository.split('/');
+                    const fullGroup = group + '/';
+                    if (!grouped[fullGroup]) {
+                        grouped[fullGroup] = [];
+                    }
+                    grouped[fullGroup].push({
+                        repo: rest.join('/'),
+                        tags: repoData.Images.sort((a, b) => a.localeCompare(b)) // Sort tags alphabetically
+                    });
+                });
+
+                // Clear the loading text
+                contentDiv.innerHTML = '';
+
+                // Create a list for groups
+                const ul = document.createElement('ul');
+
+                // Loop through groups
+                Object.keys(grouped).sort().forEach(group => { // Sort groups alphabetically
+                    const groupLi = document.createElement('li');
+                    groupLi.textContent = group;
+
+                    // Add an ID to the group for linking
+                    groupLi.id = group.replace('/', '');
+
+                    // Create a nested list for repositories
+                    const repoUl = document.createElement('ul');
+                    repoUl.className = 'subgroup';
+
+                    grouped[group].sort((a, b) => a.repo.localeCompare(b.repo)).forEach(({ repo, tags }) => { // Sort repositories alphabetically
+                        const repoLi = document.createElement('li');
+                        repoLi.textContent = repo;
+
+                        // Prevent the group from collapsing when clicking on a repository
+                        repoLi.addEventListener('click', event => {
+                            event.stopPropagation(); // Prevent group toggling
+
+                            // Toggle visibility of tags
+                            repoLi.classList.toggle('expanded');
+                        });
+
+                        // Create a nested list for tags
+                        const tagsUl = document.createElement('ul');
+                        tagsUl.className = 'subgroup';
+
+                        if (tags.length > 0) {
+                            tags.forEach(tag => {
+                                const tagLi = document.createElement('li');
+                                tagLi.textContent = `:${tag}`;
+
+                                // Add click-to-copy functionality for tags
+                                tagLi.addEventListener('click', event => {
+                                    event.stopPropagation(); // Prevent toggling any parent
+
+                                    // Construct full repository URI with tag
+                                    const fullUri = `${location.hostname}/${group}${repo}:${tag}`;
+
+                                    // Copy to clipboard
+                                    navigator.clipboard.writeText(fullUri).then(() => {
+                                        // Show a green checkmark confirmation
+                                        const checkmark = document.createElement('span');
+                                        checkmark.textContent = '✓ Copied';
+                                        checkmark.className = 'checkmark show';
+                                        tagLi.appendChild(checkmark);
+
+                                        // Remove the checkmark after 2 seconds
+                                        setTimeout(() => {
+                                            tagLi.removeChild(checkmark);
+                                        }, 2000);
+                                    }).catch(err => {
+                                        console.error('Failed to copy: ', err);
+                                    });
+                                });
+
+                                tagsUl.appendChild(tagLi);
+                            });
+                        } else {
+                            // Show a placeholder for repositories without tags
+                            const noTagsLi = document.createElement('li');
+                            noTagsLi.textContent = '(No tags available)';
+                            noTagsLi.style.color = '#888';
+                            tagsUl.appendChild(noTagsLi);
+                        }
+
+                        // Append the tags list to the repository item
+                        repoLi.appendChild(tagsUl);
+
+                        // Append the repository to the group
+                        repoUl.appendChild(repoLi);
+                    });
+
+                    // Add toggle functionality for the group
+                    groupLi.addEventListener('click', () => {
+                        groupLi.classList.toggle('expanded');
+                    });
+
+                    // Append the repository list to the group list item
+                    groupLi.appendChild(repoUl);
+
+                    // Append the group list item to the main list
+                    ul.appendChild(groupLi);
+                });
+
+                // Append the list to the content div
+                contentDiv.appendChild(ul);
+
+                // Expand the group if a hash is present in the URL
+                const hash = location.hash.slice(1); // Remove the '#' character
+                if (hash) {
+                    const targetGroup = document.getElementById(hash);
+                    if (targetGroup) {
+                        targetGroup.classList.add('expanded');
+                    }
+                }
+            })
+            .catch(error => {
+                const contentDiv = document.getElementById('content');
+                contentDiv.innerHTML = `<p style="color: red; text-align: center;">Error: ${error.message}</p>`;
+            });
+    </script>
+</body>
+</html>

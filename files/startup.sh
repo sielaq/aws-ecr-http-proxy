@@ -42,6 +42,8 @@ echo Using cache key $CACHE_KEY
 SCHEME=http
 CONFIG=/usr/local/openresty/nginx/conf/nginx.conf
 SSL_CONFIG=/usr/local/openresty/nginx/conf/ssl.conf
+HTML_DIR=/usr/local/openresty/nginx/html
+HTML_INDEX=${HTML_DIR}/index.html
 
 if [ "$ENABLE_SSL" ]; then
   sed -i -e s!REGISTRY_HTTP_TLS_CERTIFICATE!"$REGISTRY_HTTP_TLS_CERTIFICATE"!g $SSL_CONFIG
@@ -60,6 +62,7 @@ sed -i -e s!CACHE_KEY!"$CACHE_KEY"!g $CONFIG
 sed -i -e s!SCHEME!"$SCHEME"!g $CONFIG
 sed -i -e s!SSL_INCLUDE!"$SSL_INCLUDE"!g $CONFIG
 sed -i -e s!SSL_LISTEN!"$SSL_LISTEN"!g $CONFIG
+sed -i -e s!HTML_TITLE!"$HTML_TITLE"!g $HTML_INDEX
 
 # Update health-check
 sed -i -e s!PORT!"$PORT"!g /health-check.sh
@@ -87,5 +90,8 @@ echo $TOKEN > /usr/local/openresty/nginx/token.txt
 set -x
 # make sure cache directory has correct ownership
 chown -R nginx:nginx /cache
+
+# create once JSON with repos and tags
+/get_repos.sh &
 
 exec "$@"

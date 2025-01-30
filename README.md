@@ -18,7 +18,7 @@ The proxy is packaged in a docker container and can be configured with following
 | `AWS_REGION`                        | AWS Region for AWS ECR                         | Required                          |            |
 | `AWS_ACCESS_KEY_ID`                 | AWS Account Access Key ID                      | Optional                          |            |
 | `AWS_SECRET_ACCESS_KEY`             | AWS Account Secret Access Key                  | Optional                          |            |
-| `AWS_USE_EC2_ROLE_FOR_AUTH`                  | Set this to true if we do want to use aws roles for authentication instead of providing the secret and access keys explicitly | Optional                          |            |
+| `AWS_USE_EC2_ROLE_FOR_AUTH`         | Set this to true if we do want to use aws roles for authentication instead of providing the secret and access keys explicitly | Optional                          |            |
 | `UPSTREAM`                          | URL for AWS ECR                                | Required                          |            |
 | `RESOLVER`                          | DNS server to be used by proxy                 | Required                          |            |
 | `PORT`                              | Port on which proxy listens                    | Required                          |            |
@@ -27,6 +27,7 @@ The proxy is packaged in a docker container and can be configured with following
 | `ENABLE_SSL`                        | Used to enable SSL/TLS for proxy               | Optional                          | `false`    |
 | `REGISTRY_HTTP_TLS_KEY`             | Path to TLS key in the container               | Required with TLS                 |            |
 | `REGISTRY_HTTP_TLS_CERTIFICATE`     | Path to TLS cert in the container              | Required with TLS                 |            |
+| `HTML_TITLE`                        | Title used in html header section              | Optional                          |            |
 
 ### Example:
 
@@ -75,3 +76,25 @@ See the [values-file](https://github.com/evryfs/helm-charts/blob/master/charts/e
 The proxy is using `HTTP` (plain text) as default protocol for now. So in order to avoid docker client complaining either:
  - (**Recommended**) Enable SSL/TLS using `ENABLE_SSL` configuration. For that you will have to mount your **valid** certificate/key in the container and pass the paths using  `REGISTRY_HTTP_TLS_*` variables.
  - Mark the registry host as insecure in your client [deamon config](https://docs.docker.com/registry/insecure/).
+
+### Simple UI
+Main page under `/index.html` has been introduced. It is based on new endpoint `/repos.json`, updated by cron every 2 minutes.
+Use `HTML_TITLE` to set up displayed title in the header section. Besides `AmazonEC2ContainerRegistryPullOnly` role, two additional roles need to be added:
+
+```
+{
+    "Statement": [
+        {
+            "Action": [
+                "ecr:DescribeRepositories",
+                "ecr:ListImages",
+            ],
+            "Effect": "Allow",
+            "Resource": "*",
+            "Sid": "ECR"
+        }
+    ],
+    "Version": "2012-10-17"
+}
+```
+
