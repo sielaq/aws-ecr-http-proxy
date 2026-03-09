@@ -81,17 +81,12 @@ fi
 chmod 600 -R ${AWS_FOLDER}
 
 set +x
-# add the auth token in default.conf
-AUTH=$(grep  X-Forwarded-User $CONFIG | awk '{print $4}'| uniq|tr -d "\n\r")
-TOKEN=$(aws ecr get-authorization-token --query 'authorizationData[*].authorizationToken' --output text)
-
-echo $TOKEN > /usr/local/openresty/nginx/token.txt
-
+python3 /renew_token.py
 set -x
 # make sure cache directory has correct ownership
 chown -R nginx:nginx /cache
 
 # create once JSON with repos and tags
-/get_repos.sh &
+python3 /get_repos.py &
 
 exec "$@"

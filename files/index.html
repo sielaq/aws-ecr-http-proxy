@@ -4,145 +4,247 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='90' font-size='90'>🐳</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐳 registry</title>
+    <title>ECR Registry</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        html {
+            min-height: 100%;
+            background: #1a3a5c;
+        }
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            background: linear-gradient(to bottom, #87CEEB 60%, #1E90FF);
-            background-size: cover;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a2a4a 0%, #2d5a8e 50%, #1a3a5c 100%);
             background-attachment: fixed;
+            min-height: 100vh;
             margin: 0;
-            padding: 0;
+            padding: 20px 0 40px;
             color: #333;
         }
         .container {
-            max-width: 600px;
-            margin: 50px auto;
+            max-width: 680px;
+            margin: 0 auto;
             background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
         header {
-            /*background-color: #0073bb;*/
-            background: #4682B4;
+            background: linear-gradient(135deg, #2d6a9f, #1a4a7a);
             color: #fff;
-            padding: 15px;
+            padding: 20px 20px 36px;
             text-align: center;
-            font-size: 1.5em;
+            font-size: 1.4em;
+            font-weight: 600;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 2px;
+            gap: 4px;
             margin: 0;
             position: relative;
             overflow: hidden;
+            letter-spacing: 0.5px;
             text-shadow:
-              -1px -1px 0 black,
-              1px -1px 0 black,
-              -1px 1px 0 black,
-              1px 1px 0 black;
+                -1px -1px 0 black,
+                 1px -1px 0 black,
+                -1px  1px 0 black,
+                 1px  1px 0 black;
+            z-index: auto;
         }
         ul {
             list-style-type: none;
-            padding: 0;
+            padding: 8px;
             margin: 0;
         }
         ul li {
-            background: #f4f4f4;
-            margin: 5px 0; /* Reduced margin for tighter spacing */
-            padding: 10px 15px;
-            border-radius: 4px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: #f0f4f8;
+            margin: 4px 0;
+            padding: 10px 14px;
+            border-radius: 6px;
+            border-left: 3px solid #2d6a9f;
             cursor: pointer;
             position: relative;
+            transition: background 0.15s, border-color 0.15s;
+            user-select: none;
         }
         ul li:hover {
-            transform: scale(1.02);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            background: #e2ecf6;
+            border-left-color: #1a4a7a;
         }
         .subgroup {
             display: none;
-            margin-left: 20px;
-            padding-left: 0; /* Removed extra padding between groups and tags */
+            margin-left: 16px;
+            padding: 4px 0 0;
         }
         .subgroup li {
-            background: #e9e9e9;
-            margin: 3px 0; /* Tighter spacing between repositories */
-            padding: 8px 12px; /* Reduced padding for a more compact look */
+            background: #e8eef5;
+            margin: 3px 0;
+            padding: 8px 12px;
+            border-left: 2px solid #7aabcf;
+        }
+        .subgroup li:hover {
+            background: #d8e8f3;
+            border-left-color: #2d6a9f;
         }
         .subgroup li ul li {
-            background: #dfe6ef;
-            margin: 2px 0; /* Tighter spacing between tags */
-            padding: 6px 10px; /* Reduced padding for tags */
+            background: #f5f8fc;
+            margin: 2px 0;
+            padding: 6px 10px;
+            border-left: 2px solid #b0ccdf;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #2a4a6a;
+        }
+        .subgroup li ul li:hover {
+            background: #e0ecf6;
+            border-left-color: #5a9abf;
         }
         .expanded > .subgroup {
             display: block;
         }
         .checkmark {
-            color: green;
-            font-size: 0.9em;
+            color: #2e8b57;
+            font-size: 0.85em;
+            font-weight: 600;
             position: absolute;
             right: 10px;
             top: 50%;
             transform: translateY(-50%);
             opacity: 0;
             transition: opacity 0.3s ease;
+            background: #e6f4ec;
+            padding: 2px 6px;
+            border-radius: 4px;
         }
         .checkmark.show {
             opacity: 1;
         }
-        .whale{
-          text-align: center;
-          animation: float 3s ease-in-out infinite;
-          font-size: 3rem;
+        .fisherman {
+            position: fixed;
+            pointer-events: none;
+            font-size: 1rem;
+            z-index: 9999;
+            animation: fish-grow 3s ease-in forwards;
+            transform-origin: center center;
+            line-height: 1;
+        }
+        @keyframes fish-grow {
+            0%   { font-size: 1rem;  opacity: 1; }
+            90%  { font-size: 100vmax; opacity: 1; }
+            100% { font-size: 100vmax; opacity: 0; }
+        }
+        .whale-wrap {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            cursor: pointer;
+            transition: z-index 0s;
+        }
+        .whale-wrap.behind .whale {
+            opacity: 0.35;
+            filter: blur(1.5px) brightness(0.7);
+        }
+        .whale {
+            font-size: 3rem;
+            display: block;
+            animation: float 3s ease-in-out infinite;
+            /*border: 2px solid rgba(255,255,255,0.55);*/
+            border-radius: 50%;
+            padding: 6px;
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+            transition: border-color 0.2s, box-shadow 0.2s, opacity 0.8s ease, filter 0.8s ease;
+            line-height: 1;
+            text-shadow:
+                -1px -1px 0 black,
+                 1px -1px 0 black,
+                -1px  1px 0 black,
+                 1px  1px 0 black;
+        }
+        .whale-wrap:hover .whale {
+            border-color: rgba(255,255,255,0.9);
+            box-shadow: 0 0 18px rgba(255,255,255,0.45);
         }
         .wave {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          white-space: nowrap;
-          overflow: hidden;
-          color: white;
-          text-shadow:
-            -1px -1px 0 black,
-            1px -1px 0 black,
-            -1px 1px 0 black,
-            1px 1px 0 black;
-          font-size: 1.5rem;
-          animation: wave 9s linear infinite;
+            position: absolute;
+            left: 0;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            pointer-events: none;
+            text-shadow: none;
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.85);
+            bottom: 0;
+            animation: wave 9s linear infinite;
+        }
+        .wave-2 {
+            bottom: 6px;
+            font-size: 1rem;
+            color: rgba(255,255,255,0.45);
+            animation: wave-rtl 13s linear infinite;
+            animation-delay: -3s;
+        }
+        .wave-3 {
+            bottom: 12px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.3);
+            animation: wave 17s linear infinite;
+            animation-delay: -7s;
+        }
+        .wave-4 {
+            bottom: 18px;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.2);
+            animation: wave-rtl 11s linear infinite;
+            animation-delay: -5s;
+        }
+        .wave-5 {
+            bottom: 4px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.15);
+            animation: wave 21s linear infinite;
+            animation-delay: -11s;
         }
         @keyframes float {
-          0%, 100% {
-            transform: translateY(8px);
-          }
-          50% {
-            transform: translateY(5px);
-          }
+            0%, 100% { transform: translateY(4px); }
+            50%       { transform: translateY(-4px); }
         }
         @keyframes wave {
-          0% {
-            transform: translateX(100%);
-          }
-          100% {
-            transform: translateX(-100%);
-          }
+            0%   { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        @keyframes wave-rtl {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header><div class="whale">🐳</div><div class="wave">🌊</div>  HTML_TITLE</header>
+        <div style="position:relative;">
+            <header>
+                HTML_TITLE
+                <div class="wave">🌊</div>
+                <div class="wave wave-2">🌊</div>
+                <div class="wave wave-3">🌊</div>
+                <div class="wave wave-4">🌊</div>
+                <div class="wave wave-5">🌊</div>
+            </header>
+            <div class="whale-wrap">
+                <span class="whale">🐳</span>
+            </div>
+        </div>
         <div id="content">
             <p class="loading">Loading repositories...</p>
         </div>
     </div>
     <script>
         // Load the JSON file and display grouped repository names with tags
-        fetch('repos.json')
+        fetch('https://docker.mobint.io/repos.json')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to load repos.json');
@@ -195,8 +297,11 @@
                         repoLi.addEventListener('click', event => {
                             event.stopPropagation(); // Prevent group toggling
 
-                            // Toggle visibility of tags
-                            repoLi.classList.toggle('expanded');
+                            const isExpanded = repoLi.classList.contains('expanded');
+                            // Collapse all sibling repos
+                            repoUl.querySelectorAll(':scope > li.expanded').forEach(el => el.classList.remove('expanded'));
+                            // Toggle this one
+                            if (!isExpanded) repoLi.classList.add('expanded');
                         });
 
                         // Create a nested list for tags
@@ -227,6 +332,20 @@
                                         setTimeout(() => {
                                             tagLi.removeChild(checkmark);
                                         }, 2000);
+
+                                        // Easter egg: every 3rd copy (any link) spawns a growing 🎣
+                                        window._copyCount = (window._copyCount || 0) + 1;
+                                        if (window._copyCount % 3 === 0) {
+                                            const rect = tagLi.getBoundingClientRect();
+                                            const el = document.createElement('span');
+                                            el.textContent = '🎣';
+                                            el.className = 'fisherman';
+                                            el.style.left = (rect.left + rect.width / 2) + 'px';
+                                            el.style.top  = rect.top + 'px';
+                                            el.style.transformOrigin = '0 0';
+                                            document.body.appendChild(el);
+                                            el.addEventListener('animationend', () => el.remove());
+                                        }
                                     }).catch(err => {
                                         console.error('Failed to copy: ', err);
                                     });
@@ -251,7 +370,11 @@
 
                     // Add toggle functionality for the group
                     groupLi.addEventListener('click', () => {
-                        groupLi.classList.toggle('expanded');
+                        const isExpanded = groupLi.classList.contains('expanded');
+                        // Collapse all sibling groups
+                        ul.querySelectorAll(':scope > li.expanded').forEach(el => el.classList.remove('expanded'));
+                        // Toggle this one
+                        if (!isExpanded) groupLi.classList.add('expanded');
                     });
 
                     // Append the repository list to the group list item
@@ -277,6 +400,32 @@
                 const contentDiv = document.getElementById('content');
                 contentDiv.innerHTML = `<p style="color: red; text-align: center;">Error: ${error.message}</p>`;
             });
+    </script>
+    <audio id="sea" loop>
+        <source src="ocean-waves.mp3" type="audio/mpeg">
+    </audio>
+    <script>
+        const sea = document.getElementById('sea');
+        sea.volume = 0.3;
+        sea.addEventListener('timeupdate', () => {
+            if (sea.duration && sea.currentTime > sea.duration - 0.3) {
+                sea.currentTime = 0.1;
+            }
+        });
+        const whaleWrap = document.querySelector('.whale-wrap');
+        whaleWrap.addEventListener('click', () => {
+            if (sea.paused) sea.play();
+            else sea.pause();
+        });
+
+        // Randomly dive behind / resurface in front of the header
+        (function scheduleDepthToggle() {
+            const delay = 4000 + Math.random() * 6000; // 4–10s
+            setTimeout(() => {
+                whaleWrap.classList.toggle('behind');
+                scheduleDepthToggle();
+            }, delay);
+        })();
     </script>
 </body>
 </html>
