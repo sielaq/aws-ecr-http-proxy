@@ -1,4 +1,4 @@
-FROM openresty/openresty:1.29.2.1-0-alpine
+FROM openresty/openresty:1.27.1.2-13-alpine
 
 USER root
 
